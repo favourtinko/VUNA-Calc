@@ -1,6 +1,9 @@
 var left = '';
 var operator = '';
 var right = '';
+var steps = [];
+var MAX_STEPS = 6;
+
 
 function appendToResult(value) {
     if (operator.length === 0) {
@@ -41,34 +44,57 @@ function operatorToResult(value) {
 }
 
 function clearResult() {
-    left = '';
-    right = '';
-    operator = '';
-    document.getElementById('word-result').innerHTML = '';
-    document.getElementById('word-area').style.display = 'none';
-    updateResult();
+  left = "";
+  right = "";
+  operator = "";
+  steps = [];
+
+  document.getElementById("word-result").innerHTML = "";
+  document.getElementById("word-area").style.display = "none";
+  document.getElementById("steps").innerText = "";
+
+  updateResult();
 }
+
+
 
 function calculateResult() {
-    if (left.length === 0 || operator.length === 0 || right.length === 0) return;
+  if (left.length === 0 || operator.length === 0 || right.length === 0) return;
 
-    let result;
-    const l = parseFloat(left);
-    const r = parseFloat(right);
+  const l = parseFloat(left);
+  const r = parseFloat(right);
+  let result;
 
-    switch (operator) {
-        case '+': result = l + r; break;
-        case '-': result = l - r; break;
-        case '*': result = l * r; break;
-        case '/': result = r !== 0 ? l / r : 'Error'; break;
-        default: return;
-    }
+  switch (operator) {
+    case "+":
+      result = l + r;
+      break;
+    case "-":
+      result = l - r;
+      break;
+    case "*":
+      result = l * r;
+      break;
+    case "/":
+      result = r !== 0 ? l / r : "Error";
+      break;
+    default:
+      return;
+  }
 
-    left = result.toString();
-    operator = '';
-    right = '';
-    updateResult();
+  if (steps.length < MAX_STEPS) {
+    steps.push(`Step ${steps.length + 1}: ${l} ${operator} ${r} = ${result}`);
+  }
+
+  left = result.toString();
+  operator = "";
+  right = "";
+
+  updateStepsDisplay();
+  updateResult();
 }
+
+
 
 function numberToWords(num) {
     if (num === 'Error') return 'Error';
@@ -180,41 +206,9 @@ function enableSpeakButton() {
     speakBtn.disabled = !hasContent;
 }
 
-      // Copy numeric result to clipboard
-      function copyResult() {
-        const text = document.getElementById('result').value;
-        if (!text) return;
+function updateStepsDisplay() {
+  const stepsDiv = document.getElementById("steps");
+  if (!stepsDiv) return;
 
-        navigator.clipboard.writeText(text)
-        .then(() => alert('Result copied!'))
-        .catch(() => alert('Failed to copy'));
-      }
-
-function percentToResult() {
-  // Only proceed if left exists
-  if (!left) return;
-
-  // If no operator, just divide left by 100
-  if (!operator) {
-    left = (parseFloat(left) / 100).toString();
-    updateResult();
-    convertToWords(left);
-    return;
-  }
-
-  // If operator exists but right is empty, wait for user input
-  if (!right) return;
-
-  // If both operator and right exist, calculate percentage of left
-
-  let result = (parseFloat(right) / 100) * parseFloat(left);
-
-  // Move result to left, clear operator and right
-  left = result.toString();
-  operator = '';
-  right = '';
-
-  updateResult();
-  convertToWords(left);
+  stepsDiv.innerText = steps.join("\n");
 }
-
